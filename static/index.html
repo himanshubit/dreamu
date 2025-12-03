@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamu | Reality Distortion Field</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js for 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CORE STYLES (Light Black / Grey Theme) --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #334044; /* Light Black */
+            color: #e5e7eb; /* Light Grey Text */
+        }
+
+        h1 { font-family: 'Space Grotesk', sans-serif; }
+
+        /* --- 3D BACKGROUND CANVAS --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* --- MODERN PANELS (Dark Grey Glass) --- */
+        .modern-panel {
+            background: rgba(23, 23, 23, 0.6); /* Dark Grey transparent */
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 2rem;
+        }
+
+        /* --- PRESET CARDS --- */
+        .preset-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem; /* Slightly tighter radius for shorter cards */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(40, 40, 40, 0.4);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+        
+        .preset-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(50, 50, 50, 0.6);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .preset-card.active {
+            border-color: #a855f7; /* Purple-500 */
+            background: rgba(168, 85, 247, 0.15);
+            box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.5);
+        }
+
+        /* --- SCROLLBAR --- */
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 85, 247, 0.5);
+        }
+
+        /* --- ANIMATED LOADER --- */
+        .loader-ring {
+            display: inline-block;
+            position: relative;
+            width: 64px;
+            height: 64px;
+        }
+        .loader-ring div {
+            box-sizing: border-box;
+            display: block;
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            margin: 8px;
+            border: 3px solid #a855f7;
+            border-radius: 50%;
+            animation: loader-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            border-color: #a855f7 transparent transparent transparent;
+        }
+        .loader-ring div:nth-child(1) { animation-delay: -0.45s; }
+        .loader-ring div:nth-child(2) { animation-delay: -0.3s; }
+        .loader-ring div:nth-child(3) { animation-delay: -0.15s; }
+        @keyframes loader-ring {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Glass Input Field */
+        .glass-input {
+            background: rgba(30, 30, 30, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e5e7eb;
+            transition: all 0.2s;
+        }
+        .glass-input:hover {
+            background: rgba(40, 40, 40, 0.7);
+            border-color: rgba(168, 85, 247, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-center overflow-hidden">
+
+    <!-- 3D Background Rendering Target -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main App Container -->
+    <div class="w-full h-screen p-6 md:p-8 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative max-w-[1920px] mx-auto">
+        
+        <!-- LEFT PANEL: Controls -->
+        <div class="lg:col-span-4 flex flex-col h-full justify-center relative z-10 w-full px-4">
+            
+            <!-- Header -->
+            <div class="mb-8 pl-2">
+                <h1 class="text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-400 to-gray-600 mb-2">
+                    dreamu.
+                </h1>
+                <div class="flex items-center gap-3">
+                    <span class="w-12 h-[2px] bg-purple-600 rounded-full inline-block"></span>
+                    <p class="text-gray-400 font-medium text-sm tracking-widest uppercase">
+                        Reality Distortion
+                    </p>
+                </div>
+                <!-- Updated Author Link -->
+                <a href="https://www.linkedin.com/in/himanshuxbit" target="_blank" class="group flex items-center gap-2 mt-3 pl-1 w-fit">
+                    <span class="text-gray-500 text-xs font-mono uppercase tracking-wider group-hover:text-purple-400 transition-colors">by Himanshu</span>
+                    <svg class="w-3 h-3 text-gray-600 group-hover:text-purple-500 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
+            </div>
+
+            <!-- 1. Upload Section -->
+            <div class="mb-8 group modern-panel p-6">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 group-hover:text-purple-400 transition-colors">
+                    01 / Source Material
+                </label>
+                <div class="relative">
+                    <input type="file" id="fileInput" accept="image/*" 
+                        class="glass-input block w-full text-sm text-gray-300
+                        file:mr-4 file:py-4 file:px-6
+                        file:rounded-lg file:border-0
+                        file:text-xs file:font-bold file:uppercase file:tracking-wider
+                        file:bg-white/5 file:text-gray-300
+                        hover:file:bg-purple-500/20 hover:file:text-white
+                        file:transition-all file:cursor-pointer
+                        cursor-pointer rounded-full transition-all p-1 pr-4 shadow-lg"/>
+                </div>
+            </div>
+
+            <!-- 2. Preset Grid -->
+            <div class="flex-grow min-h-0 mb-4 modern-panel p-6 overflow-hidden">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">
+                    02 / Select Aesthetic
+                </label>
+                
+                <div class="w-full custom-scroll overflow-y-auto grid grid-cols-3 gap-3 pb-2 pr-2 max-h-[320px]">
+                    
+                    <!-- CATEGORY: REALITY -->
+                    <div class="col-span-3 text-[10px] font-bold uppercase text-gray-500 tracking-widest mt-1 mb-1">Reality</div>
+                    <div onclick="selectStyle('real_raw', this)" class="preset-card active rounded-xl h-20 group relative"><img src="/static/previews/real.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Raw'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Raw</span></div></div>
+                    <div onclick="selectStyle('real_nature', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/macro.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Nature'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Nature</span></div></div>
+                    <div onclick="selectStyle('real_street', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/sketch.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Street'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Street</span></div></div>
+
+                    <!-- CATEGORY: PORTRAIT -->
+                    <div class="col-span-3 text-[10px] font-bold uppercase text-gray-500 tracking-widest mt-3 mb-1">Portrait</div>
+                    <div onclick="selectStyle('port_studio', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/real.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Studio'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Studio</span></div></div>
+                    <div onclick="selectStyle('port_fashion', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/cinematic.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Fashion'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Fashion</span></div></div>
+                    <div onclick="selectStyle('port_candid', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/macro.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Candid'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Candid</span></div></div>
+
+                    <!-- CATEGORY: CINEMATIC -->
+                    <div class="col-span-3 text-[10px] font-bold uppercase text-gray-500 tracking-widest mt-3 mb-1">Cinematic</div>
+                    <div onclick="selectStyle('cine_cyber', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/cyber.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Cyber'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Cyber</span></div></div>
+                    <div onclick="selectStyle('cine_noir', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/gothic.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Noir'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Noir</span></div></div>
+                    <div onclick="selectStyle('cine_wes', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/retro.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Wes'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Wes</span></div></div>
+
+                    <!-- CATEGORY: ART -->
+                    <div class="col-span-3 text-[10px] font-bold uppercase text-gray-500 tracking-widest mt-3 mb-1">Art & Illustration</div>
+                    <div onclick="selectStyle('art_oil', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/oil.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Oil'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Oil</span></div></div>
+                    <div onclick="selectStyle('art_ghibli', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/ghibli.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Ghibli'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Anime</span></div></div>
+                    <div onclick="selectStyle('art_pop', this)" class="preset-card rounded-xl h-20 group relative"><img src="/static/previews/popart.jpg" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/100x100/1a1a1a/FFF?text=Pop'"><div class="absolute bottom-1 left-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10"><span class="text-[9px] font-bold uppercase tracking-wider text-white">Pop</span></div></div>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button onclick="dream()" id="dreamBtn" class="w-full py-6 rounded-full bg-white text-black hover:bg-purple-500 hover:text-white font-bold text-lg tracking-widest uppercase shadow-[0_0_30px_rgba(255,255,255,0.1)] transform hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10">
+                <span>Initialize Dream</span>
+                <svg class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </button>
+        </div>
+
+        <!-- RIGHT PANEL: Preview -->
+        <div class="lg:col-span-8 flex flex-col items-center justify-center relative h-full py-4">
+            <div class="modern-panel w-full h-full flex flex-col items-center justify-center relative overflow-hidden group !bg-black/20 !border-white/5">
+                
+                <!-- Preview Image Area -->
+                <div class="relative w-full flex-grow flex items-center justify-center p-8">
+                    <div id="placeholder" class="text-center text-gray-500 transition-all duration-500 group-hover:text-gray-400">
+                        <div class="w-32 h-32 mx-auto mb-6 rounded-full border-2 border-dashed border-gray-700 flex items-center justify-center bg-gray-900/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <p class="text-xs font-mono tracking-[0.3em] uppercase font-medium">Awaiting Input Signal</p>
+                    </div>
+
+                    <div id="loader" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20 backdrop-blur-md">
+                        <div class="loader-ring"><div></div><div></div><div></div><div></div></div>
+                        <p class="mt-8 text-purple-400 font-mono text-xs tracking-widest animate-pulse font-bold">SYNTHESIZING REALITY...</p>
+                    </div>
+
+                    <img id="resultImg" class="w-full h-full object-contain hidden relative z-10 shadow-2xl transition-opacity duration-700 ease-in-out rounded-lg" />
+                </div>
+
+                <!-- GEMINI STORY SECTION (Scrollable if long) -->
+                <div id="storyPanel" class="w-full bg-black/80 border-t border-white/10 p-6 hidden backdrop-blur-xl transition-all duration-500 translate-y-full max-h-[30%] overflow-y-auto custom-scroll">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-lg">✨</span>
+                            <h3 id="dreamTitle" class="font-bold text-xl text-white font-space"></h3>
+                        </div>
+                        <p id="dreamStory" class="text-gray-300 leading-relaxed font-light"></p>
+                    </div>
+                </div>
+                
+                <a id="downloadLink" href="#" download="dream_image.png" class="hidden absolute bottom-8 right-8 z-30 bg-white text-black hover:bg-purple-400 px-8 py-4 rounded-full font-bold text-sm tracking-wider uppercase shadow-2xl transition-all flex items-center gap-3 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 duration-300 hover:shadow-purple-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Save
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- 3D BACKGROUND (RANDOM + DRIFT + DENSITY 0.75) --- */
+        const init3DBackground = () => {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 6, 0);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 12000; 
+            const posArray = new Float32Array(particlesCount * 3);
+            const initialPositions = new Float32Array(particlesCount * 3);
+            const randomSpeeds = new Float32Array(particlesCount);
+
+            for(let i = 0; i < particlesCount; i++) {
+                const i3 = i * 3;
+                posArray[i3] = (Math.random() - 0.5) * 35;     
+                posArray[i3 + 1] = (Math.random() - 0.5) * 4;  
+                posArray[i3 + 2] = (Math.random() - 0.5) * 15; 
+
+                initialPositions[i3] = posArray[i3];
+                initialPositions[i3 + 1] = posArray[i3 + 1];
+                initialPositions[i3 + 2] = posArray[i3 + 2];
+                randomSpeeds[i] = Math.random() * 0.5 + 0.5;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.02,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.75, 
+                sizeAttenuation: true
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, material);
+            scene.add(particlesMesh);
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+            document.addEventListener('mousemove', (event) => {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            const clock = new THREE.Clock();
+
+            const animate = () => {
+                const elapsedTime = clock.getElapsedTime();
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = new THREE.Vector3();
+                raycaster.ray.intersectPlane(plane, intersects);
+
+                const positions = particlesGeometry.attributes.position.array;
+                for(let i = 0; i < particlesCount; i++) {
+                    const i3 = i * 3;
+                    const speed = randomSpeeds[i];
+                    let y = Math.sin(elapsedTime * 0.3 * speed + initialPositions[i3] * 0.5) * 0.3 + Math.cos(elapsedTime * 0.2 * speed + initialPositions[i3+2] * 0.5) * 0.3;
+                    const driftX = Math.sin(elapsedTime * 0.1 * speed + i) * 0.2;
+                    const driftZ = Math.cos(elapsedTime * 0.15 * speed + i) * 0.2;
+                    positions[i3] = initialPositions[i3] + driftX;
+                    positions[i3 + 2] = initialPositions[i3 + 2] + driftZ;
+
+                    if (intersects) {
+                        const dx = positions[i3] - intersects.x;
+                        const dz = positions[i3 + 2] - intersects.z;
+                        const dist = Math.sqrt(dx*dx + dz*dz);
+                        if(dist < 2.5) { y -= Math.max(0, 2.5 - dist) * 0.15; }
+                    }
+                    positions[i3 + 1] = initialPositions[i3+1] + y;
+                }
+                particlesGeometry.attributes.position.needsUpdate = true;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            };
+            animate();
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+        init3DBackground();
+
+        /* --- LOGIC --- */
+        let selectedStyle = 'real_raw'; 
+
+        function selectStyle(style, element) {
+            selectedStyle = style;
+            document.querySelectorAll('.preset-card').forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        async function dream() {
+            const fileInput = document.getElementById('fileInput');
+            if(fileInput.files.length === 0) return alert("Please upload source material first.");
+
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('placeholder').classList.add('hidden');
+            document.getElementById('resultImg').classList.add('hidden');
+            document.getElementById('downloadLink').classList.add('hidden');
+            document.getElementById('storyPanel').classList.add('hidden', 'translate-y-full');
+            const btn = document.getElementById('dreamBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-pulse tracking-widest">DREAMING...</span>`;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('style', selectedStyle);
+
+            try {
+                const response = await fetch('/api/dream', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                if(data.status === 'success') {
+                    const img = document.getElementById('resultImg');
+                    const dlLink = document.getElementById('downloadLink');
+                    
+                    img.src = data.dream_url + "?t=" + new Date().getTime();
+                    dlLink.href = data.dream_url;
+                    dlLink.download = `dreamu_${new Date().getTime()}.png`;
+                    
+                    if(data.title) {
+                        document.getElementById('dreamTitle').innerText = data.title;
+                        document.getElementById('dreamStory').innerText = data.story;
+                    }
+
+                    img.onload = () => {
+                        document.getElementById('loader').classList.add('hidden');
+                        img.classList.remove('hidden');
+                        dlLink.classList.remove('hidden');
+                        img.style.opacity = 0;
+                        setTimeout(() => img.style.opacity = 1, 50);
+                        
+                        const storyPanel = document.getElementById('storyPanel');
+                        storyPanel.classList.remove('hidden');
+                        setTimeout(() => storyPanel.classList.remove('translate-y-full'), 100);
+                    };
+                } else {
+                    alert('Dream failed: ' + data.error);
+                    resetUI();
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection corrupted. Check console.");
+                resetUI();
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.innerHTML = `<span>Initialize Dream</span><svg class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
+            }
+        }
+
+        function resetUI() {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('placeholder').classList.remove('hidden');
+            document.getElementById('downloadLink').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
