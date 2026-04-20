@@ -1,0 +1,96 @@
+{
+  "default_t2i_model": "sdxl-lightning",
+  "default_i2i_model": "omnigen",
+  "force_vram_offload": true,
+  "enable_vae_slicing": true,
+  "enable_vae_tiling": true,
+  "max_resolution": 768,
+  "hf_cache_dir": "Y:/dreaemu_engine",
+  "t2i_models": [
+    {
+      "id": "sdxl-lightning",
+      "name": "SDXL Lightning",
+      "repo": "ByteDance/SDXL-Lightning",
+      "desc": "Ultra-fast — 2-4 steps",
+      "default_steps": 4,
+      "default_guidance": 0.0,
+      "quantization": null
+    },
+    {
+      "id": "flux-nf4",
+      "name": "FLUX.1 [schnell] via NF4",
+      "repo": "sayakpaul/flux.1-schnell-nf4",
+      "desc": "Best Adherence, 4-bit compressed",
+      "default_steps": 4,
+      "default_guidance": 0.0,
+      "quantization": "nf4"
+    },
+    {
+      "id": "omnigen",
+      "name": "OmniGen",
+      "repo": "shitao/OmniGen-v1",
+      "desc": "Unified VRAM Saver, 8-bit",
+      "default_steps": 20,
+      "default_guidance": 4.5,
+      "quantization": "8bit"
+    },
+    {
+      "id": "stable-cascade",
+      "name": "Stable Cascade",
+      "repo": "stabilityai/stable-cascade",
+      "desc": "Highly compressed latent space",
+      "default_steps": 20,
+      "default_guidance": 4.0,
+      "quantization": null
+    },
+    {
+      "id": "pixart-sigma",
+      "name": "PixArt-Σ (Sigma)",
+      "repo": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+      "desc": "Efficient Transformer",
+      "default_steps": 20,
+      "default_guidance": 4.5,
+      "quantization": null
+    }
+  ],
+  "i2i_models": [
+    {
+      "id": "realvis-v4",
+      "name": "RealVisXL V4.0",
+      "repo": "SG161222/RealVisXL_V4.0",
+      "desc": "Photorealistic — Best quality img2img",
+      "default_steps": 35,
+      "default_guidance": 6.0,
+      "default_strength": 0.65,
+      "quantization": null
+    },
+    {
+      "id": "sdxl-base",
+      "name": "SDXL Base 1.0",
+      "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+      "desc": "General Purpose — Baseline SDXL",
+      "default_steps": 30,
+      "default_guidance": 7.0,
+      "default_strength": 0.6,
+      "quantization": null
+    },
+    {
+      "id": "omnigen",
+      "name": "OmniGen",
+      "repo": "shitao/OmniGen-v1",
+      "desc": "Unified VRAM Saver, 8-bit",
+      "default_steps": 20,
+      "default_guidance": 4.5,
+      "quantization": "8bit"
+    },
+    {
+      "id": "sdxl-lightning",
+      "name": "SDXL Lightning",
+      "repo": "ByteDance/SDXL-Lightning",
+      "desc": "Ultra-fast — 2-4 steps",
+      "default_steps": 4,
+      "default_guidance": 0.0,
+      "quantization": null
+    }
+  ]
+}

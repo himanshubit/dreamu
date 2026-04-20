@@ -330,9 +330,7 @@ async def generate_image(
 
 # -- Entry Point --------------------------------------
 
-# Server reload triggered for theme changes
 if __name__ == "__main__":
     # Run the server
     print("DreamU Server Starting at http://127.0.0.1:8000")
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-# Server reload triggered for ai_engine.py changes

@@ -110,7 +110,7 @@ if not MODEL_REGISTRY:
     }
 
 
-# ── Gemini Brain (Preserved) ────────────────────────
+# ── Gemini Brain ─────────────────────────────────────
 
 class GeminiBrain:
     """Optional Gemini Vision integration for prompt enhancement."""
@@ -288,7 +288,6 @@ class DreamuEngine:
             if pipe is None:
                 return False
             
-            # ... (VRAM optimizations) ...
             if self.device == "cuda":
                 if CONFIG.get("force_vram_offload", True):
                     pipe.enable_sequential_cpu_offload()
