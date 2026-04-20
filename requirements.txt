@@ -4,3 +4,14 @@ python-multipart
 google-genai
 python-dotenv
 pillow
+diffusers
+torch
+accelerate
+transformers
+safetensors
+pydantic
+sentencepiece
+tiktoken
+protobuf
+bitsandbytes
+peft
