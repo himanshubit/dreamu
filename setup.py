@@ -1,16 +1,7 @@
-#!/usr/bin/env python3
-"""
-DreamU Setup Wizard
-═══════════════════
-Interactive terminal configuration for first-run setup.
-Writes user preferences to config.json at the project root.
-"""
-
 import os
 import sys
 import json
 
-# Force UTF-8 output on Windows to support box-drawing characters
 if sys.platform == "win32":
     os.system("chcp 65001 >nul 2>&1")
     try:
@@ -18,10 +9,6 @@ if sys.platform == "win32":
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
-
-# ──────────────────────────────────────────────
-# Model Registry (VRAM-vetted for RTX 4050 6GB)
-# ──────────────────────────────────────────────
 
 T2I_MODELS = [
     {
@@ -114,10 +101,6 @@ I2I_MODELS = [
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 
-# ──────────────────────────────────────────────
-# Terminal Helpers
-# ──────────────────────────────────────────────
-
 PURPLE = "\033[38;5;141m"
 CYAN = "\033[38;5;87m"
 DIM = "\033[2m"
@@ -130,12 +113,10 @@ CLEAR = "\033[2J\033[H"
 
 
 def clear_screen():
-    """Clear the terminal."""
     print(CLEAR, end="")
 
 
 def print_header():
-    """Display the stylized DreamU header."""
     header = f"""
 {PURPLE}{BOLD}
     ╔══════════════════════════════════════════════════╗
@@ -158,7 +139,6 @@ def print_header():
 
 
 def print_divider(label=""):
-    """Print a styled section divider."""
     if label:
         print(f"\n  {PURPLE}{'━' * 4} {BOLD}{label} {RESET}{PURPLE}{'━' * 40}{RESET}\n")
     else:
@@ -166,10 +146,6 @@ def print_divider(label=""):
 
 
 def prompt_choice(options, prompt_text):
-    """
-    Display numbered options and return the user's selection.
-    Loops until a valid choice is made.
-    """
     for i, opt in enumerate(options, 1):
         marker = f"{CYAN}[{i}]{RESET}"
         name = f"{BOLD}{opt['name']}{RESET}"
@@ -195,7 +171,6 @@ def prompt_choice(options, prompt_text):
 
 
 def prompt_yesno(question, default=False):
-    """Ask a yes/no question, return bool."""
     hint = "[y/N]" if not default else "[Y/n]"
     try:
         raw = input(f"  {YELLOW}▸ {question} {hint}: {RESET}").strip().lower()
@@ -207,24 +182,16 @@ def prompt_yesno(question, default=False):
         sys.exit(1)
 
 
-# ──────────────────────────────────────────────
-# Main Setup Flow
-# ──────────────────────────────────────────────
-
 def run_setup():
-    """Execute the full interactive setup wizard."""
     clear_screen()
     print_header()
 
-    # ── Step 1: Default Text-to-Image Model ──
     print_divider("STEP 1 — Default Text-to-Image Model")
     t2i = prompt_choice(T2I_MODELS, "Choose your default T2I model")
 
-    # ── Step 2: Default Image-to-Image Model ──
     print_divider("STEP 2 — Default Image-to-Image Model")
     i2i = prompt_choice(I2I_MODELS, "Choose your default I2I model")
 
-    # ── Step 3: VRAM Safety ──
     print_divider("STEP 3 — VRAM Configuration")
     force_offload = prompt_yesno(
         "Force Sequential CPU Offloading on startup? (Recommended for 6GB)", default=True
@@ -238,7 +205,6 @@ def run_setup():
         "Enable VAE Tiling? (Enables higher resolutions)", default=True
     )
 
-    # ── Step 4: Cache Directory ──
     print_divider("STEP 4 — Model Cache")
     default_cache = os.environ.get("HF_HOME", "Y:/dreaemu_engine")
     print(f"    {DIM}Current HF cache directory: {default_cache}{RESET}")
@@ -252,7 +218,6 @@ def run_setup():
 
     cache_dir = custom_cache if custom_cache else default_cache
 
-    # ── Build Config ──
     config = {
         "default_t2i_model": t2i["id"],
         "default_i2i_model": i2i["id"],
@@ -265,7 +230,6 @@ def run_setup():
         "i2i_models": I2I_MODELS,
     }
 
-    # ── Write config.json ──
     try:
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
@@ -273,7 +237,6 @@ def run_setup():
         print(f"\n  {RED}✗ Failed to write config: {e}{RESET}\n")
         sys.exit(1)
 
-    # ── Summary ──
     print_divider("CONFIGURATION SAVED")
     print(f"""
     {GREEN}{BOLD}✓ Config written to:{RESET} {DIM}{CONFIG_PATH}{RESET}

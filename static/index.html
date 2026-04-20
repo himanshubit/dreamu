@@ -8,22 +8,14 @@
     <meta name="description"
         content="DreamU — Run diverse AI image generation models locally with a beautiful control dashboard. SDXL Turbo, Juggernaut XL, FLUX, PixArt and more.">
 
-    <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
 
     <style>
-        /* ═══════════════════════════════════════════════
-           DESIGN SYSTEM — DreamU 2.0
-           ═══════════════════════════════════════════════ */
-
         :root {
-            /* Palette */
-            --bg-deep: #050208; /* Deep Purple Black */
-            /* Neutral Grey-Black Background */
+            --bg-deep: #050208;
             --bg-panel: rgba(15, 23, 42, 0.55);
-            /* Original Navy-Glass Sidebar */
             --bg-input: rgba(30, 41, 59, 0.35);
             --bg-input-hover: rgba(30, 41, 59, 0.55);
             --border-subtle: rgba(255, 255, 255, 0.06);
@@ -40,14 +32,11 @@
             --warning: #fbbf24;
             --danger: #f87171;
 
-            /* Radius */
-            --radius-sm: 0.625rem;
             --radius-md: 1rem;
             --radius-lg: 1.5rem;
             --radius-xl: 2rem;
             --radius-full: 9999px;
 
-            /* Shadows */
             --shadow-glow: 0 0 30px rgba(168, 85, 247, 0.15);
             --shadow-deep: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
@@ -73,7 +62,6 @@
             font-family: 'Space Grotesk', sans-serif;
         }
 
-        /* ── Cellular Automaton Background ─────── */
         #automaton-bg {
             position: fixed;
             top: 0;
@@ -84,7 +72,6 @@
             pointer-events: none;
         }
 
-        /* ── Layout ────────────────────────────── */
         .app-container {
             position: relative;
             z-index: 1;
@@ -102,7 +89,6 @@
             }
         }
 
-        /* ── Control Panel (Left) ──────────────── */
         .control-panel {
             background: var(--bg-panel);
             backdrop-filter: blur(24px);
@@ -127,7 +113,6 @@
             }
         }
 
-        /* ── Scrollbar ─────────────────────────── */
         .control-panel::-webkit-scrollbar {
             width: 4px;
         }
@@ -145,7 +130,6 @@
             background: rgba(168, 85, 247, 0.4);
         }
 
-        /* ── Header ────────────────────────────── */
         .header {
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-subtle);
@@ -203,7 +187,6 @@
             color: var(--accent-purple);
         }
 
-        /* ── Section Labels ────────────────────── */
         .section-label {
             font-size: 0.6rem;
             font-weight: 600;
@@ -213,7 +196,6 @@
             margin-bottom: 0.4rem;
         }
 
-        /* ── Glass Controls ────────────────────── */
         .glass-select,
         .glass-input,
         .glass-textarea {
@@ -272,7 +254,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* ── Collapsible Section ───────────────── */
         .collapsible-trigger {
             display: flex;
             align-items: center;
@@ -313,7 +294,6 @@
             opacity: 1;
         }
 
-        /* ── Sliders ───────────────────────────── */
         .slider-group {
             display: flex;
             flex-direction: column;
@@ -382,7 +362,6 @@
             box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
         }
 
-        /* ── Seed Row ──────────────────────────── */
         .seed-row {
             display: flex;
             align-items: center;
@@ -412,7 +391,6 @@
             color: var(--accent-purple);
         }
 
-        /* ── Upload Zone ───────────────────────── */
         .upload-zone {
             border: 2px dashed rgba(100, 116, 139, 0.25);
             border-radius: var(--radius-md);
@@ -472,7 +450,6 @@
             display: none;
         }
 
-        /* ── Generate Button ───────────────────── */
         .generate-btn {
             width: 100%;
             padding: 1rem;
@@ -531,7 +508,6 @@
             }
         }
 
-        /* ── Preview Canvas (Right) ────────────── */
         .preview-panel {
             display: flex;
             flex-direction: column;
@@ -559,7 +535,6 @@
             position: relative;
         }
 
-        /* ── CLI Container ─────────────────────── */
         #cli-container {
             display: flex;
             flex-direction: column;
@@ -575,7 +550,6 @@
             display: none;
         }
 
-        /* -- Idle State (ASCII Logo) -- */
         #cli-idle-state {
             display: flex;
             flex-direction: column;
@@ -602,7 +576,6 @@
             text-align: center;
         }
 
-        /* -- Loading State (Progress Bar) -- */
         #cli-loading-state {
             display: none;
             flex-direction: column;
@@ -682,7 +655,6 @@
             }
         }
 
-        /* ── Result Image ──────────────────────── */
         .result-image {
             width: 100%;
             max-height: 70vh;
@@ -699,7 +671,6 @@
             opacity: 1;
         }
 
-        /* ── Meta Bar ──────────────────────────── */
         .meta-bar {
             display: none;
             width: 100%;
@@ -733,7 +704,6 @@
             color: var(--text-secondary);
         }
 
-        /* ── Action Buttons ────────────────────── */
         .action-btns {
             display: none;
             gap: 0.6rem;
@@ -776,7 +746,6 @@
             height: 14px;
         }
 
-        /* ── Story Panel ───────────────────────── */
         .story-panel {
             display: none;
             width: 100%;
@@ -1500,13 +1469,11 @@ v2.0.0 // RTX 4050 OPTIMIZED
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    // Snap to 100%
                     stopProgress();
                     currentProgress = 100;
                     updateProgressBar(100);
                     updateStatusLine('generation complete', false, true);
 
-                    // Wait 300ms then show image
                     await new Promise(r => setTimeout(r, 300));
 
                     resultImg.src = data.image_url + '?t=' + Date.now();
@@ -1514,32 +1481,27 @@ v2.0.0 // RTX 4050 OPTIMIZED
                         showCliResult();
                         resultImg.classList.add('visible');
 
-                        // Meta bar
                         document.getElementById('metaModel').textContent = data.model_id || '--';
                         document.getElementById('metaSeed').textContent = data.seed || '--';
                         document.getElementById('metaTime').textContent = data.time_seconds ? `${data.time_seconds}s` : '--';
                         metaBar.classList.add('visible');
 
-                        // Download link
                         const dlLink = document.getElementById('downloadLink');
                         dlLink.href = data.image_url;
                         dlLink.download = `dreamu_${data.seed || Date.now()}.png`;
                         actionBtns.classList.add('visible');
 
-                        // Story panel
                         if (data.title) {
                             document.getElementById('storyTitle').textContent = data.title;
                             document.getElementById('storyText').textContent = data.story || '';
                             storyPanel.classList.add('visible');
                         }
 
-                        // Update seed input with used seed
                         if (data.seed) {
                             document.getElementById('seedInput').value = data.seed;
                         }
                     };
 
-                    // Poll status for VRAM update
                     setTimeout(async () => {
                         await pollStatus();
                         try {
@@ -1553,7 +1515,6 @@ v2.0.0 // RTX 4050 OPTIMIZED
                     stopProgress();
                     updateStatusLine('GENERATION FAILED: ' + (data.error || 'Unknown error'), true);
                     updateProgressBar(currentProgress);
-                    // Return to idle after 3 seconds
                     setTimeout(() => showCliIdle(), 3000);
                 }
             } catch (err) {
@@ -1573,7 +1534,6 @@ v2.0.0 // RTX 4050 OPTIMIZED
             showCliIdle();
         }
 
-        /* ── Cellular Automaton Background ─────── */
         function initBackground() {
             const canvas = document.getElementById('automaton-bg');
             const ctx = canvas.getContext('2d');
@@ -1604,12 +1564,10 @@ v2.0.0 // RTX 4050 OPTIMIZED
 
                 if (logo) {
                     const r = logo.getBoundingClientRect();
-                    // Side: 1px (1/5th of 5), Up/Down: 5px
                     bounds.push({ x1: r.left - 1, y1: r.top - 5, x2: r.right + 1, y2: r.bottom + 5 });
                 }
                 if (cli && cli.offsetParent !== null) {
                     const r = cli.getBoundingClientRect();
-                    // Side: 3px (1/5th of 15), Up/Down: 15px
                     bounds.push({ x1: r.left - 3, y1: r.top - 15, x2: r.right + 3, y2: r.bottom + 15 });
                 }
                 return bounds;

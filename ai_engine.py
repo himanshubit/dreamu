@@ -1,10 +1,3 @@
-"""
-DreamU AI Engine — Universal Model Loader & Generator
-══════════════════════════════════════════════════════
-Supports dynamic model switching with strict 6GB VRAM management.
-Reads configuration from config.json written by setup.py.
-"""
-
 import os
 import gc
 import json
@@ -30,14 +23,11 @@ except ImportError:
 
 from dotenv import load_dotenv
 
-# ── Environment ──────────────────────────────────────
 load_dotenv()
 
-# ── Config Loading ───────────────────────────────────
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 
 def load_config():
-    """Load config.json, returning defaults if not found."""
     defaults = {
         "default_t2i_model": "sdxl-turbo",
         "default_i2i_model": "realvis-v4",
@@ -61,15 +51,9 @@ def load_config():
 
 CONFIG = load_config()
 
-# Apply environment vars from config
 os.environ["HF_HOME"] = CONFIG["hf_cache_dir"]
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-
-# ── Model Registry ───────────────────────────────────
-# Combines t2i and i2i models from config into a flat lookup dict
-
-# Initialize registry with empty lists for each ID to handle shared IDs
 MODEL_REGISTRY = {}
 
 def register_models(models, mtype):
@@ -86,7 +70,6 @@ def register_models(models, mtype):
 register_models(CONFIG.get("t2i_models", []), "t2i")
 register_models(CONFIG.get("i2i_models", []), "i2i")
 
-# Hardcoded fallbacks in case config has no model lists
 if not MODEL_REGISTRY:
     MODEL_REGISTRY = {
         "sdxl-lightning": {
@@ -109,11 +92,7 @@ if not MODEL_REGISTRY:
         },
     }
 
-
-# ── Gemini Brain ─────────────────────────────────────
-
 class GeminiBrain:
-    """Optional Gemini Vision integration for prompt enhancement."""
 
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
@@ -127,7 +106,6 @@ class GeminiBrain:
                 print(f"Gemini Connection Failed: {e}")
 
     def enhance_prompt(self, pil_image, style_preset):
-        """Use Gemini Vision to analyze an image and create a detailed prompt."""
         if not self.client:
             return style_preset
 
@@ -157,7 +135,6 @@ class GeminiBrain:
             return style_preset
 
     def interpret_dream(self, style_name):
-        """Generate a creative title and story for the generated image."""
         if not self.client:
             return "Untitled Dream", "A generated reality."
         try:
@@ -171,14 +148,7 @@ class GeminiBrain:
             return "Untitled", "Processing complete."
 
 
-# ── DreamU Engine ────────────────────────────────────
-
 class DreamuEngine:
-    """
-    Universal image generation engine with dynamic model switching
-    and strict VRAM management for 6GB GPUs.
-    """
-
     def __init__(self):
         print("=" * 55)
         print("  DreamU Engine -- Initializing")
@@ -205,10 +175,7 @@ class DreamuEngine:
 
         print("  Engine Ready -- No model loaded yet (lazy loading).\n")
 
-    # ── VRAM Management ──────────────────────────────
-
     def unload_model(self):
-        """Nuclear VRAM cleanup: delete pipeline and flush all caches."""
         if self.pipe is not None:
             print(f"Unloading model: {self.current_model_id}...")
             del self.pipe
@@ -224,19 +191,11 @@ class DreamuEngine:
             print(f"VRAM after cleanup: {allocated:.0f} MB")
 
     def get_vram_usage(self):
-        """Return current VRAM usage in MB, or 0 if CPU."""
         if HAS_TORCH and self.device == "cuda":
             return torch.cuda.memory_allocated() / (1024 ** 2)
         return 0.0
 
-    # ── Model Loading ────────────────────────────────
-
     def load_model(self, model_id, mode="t2i"):
-        """
-        Dynamically load a model by its registry ID and mode.
-        Unloads the previous model first to free VRAM.
-        """
-        # Distinguish between text/img variants of the same model ID
         full_session_id = f"{model_id}_{mode}"
         if self.current_model_id == full_session_id and self.pipe is not None:
             return True
@@ -320,7 +279,6 @@ class DreamuEngine:
             return False
 
     def _load_sdxl_text2img(self, repo, **kwargs):
-        """Load a standard SDXL/Lightning text-to-image pipeline."""
         from diffusers import AutoPipelineForText2Image, DPMSolverMultistepScheduler
 
         is_lightning_repo = (repo == "ByteDance/SDXL-Lightning")
@@ -368,7 +326,6 @@ class DreamuEngine:
         return pipe
 
     def _load_sdxl_img2img(self, repo, **kwargs):
-        """Load a standard SDXL image-to-image pipeline."""
         from diffusers import AutoPipelineForImage2Image, DPMSolverMultistepScheduler
 
         is_lightning_repo = (repo == "ByteDance/SDXL-Lightning")
@@ -415,7 +372,6 @@ class DreamuEngine:
         return pipe
 
     def _load_pixart(self, repo, **kwargs):
-        """Load PixArt-Sigma pipeline."""
         try:
             from diffusers import PixArtSigmaPipeline
 
@@ -433,7 +389,6 @@ class DreamuEngine:
             return self._load_sdxl_text2img(repo, **kwargs)
 
     def _load_flux(self, repo, **kwargs):
-        """Load FLUX.1 NF4 quantized model."""
         try:
             from diffusers import FluxPipeline
 
@@ -449,7 +404,6 @@ class DreamuEngine:
             return None
 
     def _load_omnigen(self, repo, **kwargs):
-        """Load OmniGen Pipeline."""
         try:
             from diffusers import OmniGenPipeline
             pipe = OmniGenPipeline.from_pretrained(
@@ -465,7 +419,6 @@ class DreamuEngine:
             return None
 
     def _load_stable_cascade(self, repo, **kwargs):
-        """Load Stable Cascade Pipeline."""
         try:
             from diffusers import AutoPipelineForText2Image
             pipe = AutoPipelineForText2Image.from_pretrained(
@@ -481,7 +434,6 @@ class DreamuEngine:
             return None
 
     def _get_pipe_params(self, params):
-        """Filter params to only include those supported by the current self.pipe."""
         if not self.pipe:
             return params
         
@@ -496,13 +448,7 @@ class DreamuEngine:
             
         return filtered
 
-    # ── Image Utilities ──────────────────────────────
-
     def _resize_image(self, image):
-        """
-        Resize image to fit within max_resolution while maintaining
-        aspect ratio. Ensures dimensions are multiples of 8.
-        """
         max_dim = self.max_resolution
         width, height = image.size
 
@@ -523,25 +469,7 @@ class DreamuEngine:
 
         return image.resize((new_width, new_height), Image.LANCZOS)
 
-    # ── Generation ───────────────────────────────────
-
     def generate(self, **kwargs):
-        """
-        Universal generation function.
-
-        Kwargs:
-            prompt (str):               The text prompt
-            negative_prompt (str):      Negative prompt
-            model_id (str):             Model registry ID
-            strength (float):           Img2img strength (0.1-1.0)
-            guidance_scale (float):     CFG scale
-            num_inference_steps (int):  Number of denoising steps
-            seed (int):                 RNG seed (-1 = random)
-            image_path (str|None):      Path to source image for img2img
-            preset (str|None):          Preset key for Gemini enhancement
-        Returns:
-            dict: {image, seed, model_id, time_seconds, title, story, error}
-        """
         start_time = time.time()
 
         prompt = kwargs.get("prompt", "")
@@ -592,7 +520,6 @@ class DreamuEngine:
                 prompt = f"{enhanced}, masterpiece, best quality, 8k uhd, high fidelity, (vivid colors:1.2)"
                 title, story = self.gemini.interpret_dream(preset)
 
-            # -- Ensure prompt is not empty -----------
             if not prompt.strip():
                 prompt = "masterpiece, best quality, highly detailed"
 
@@ -600,7 +527,6 @@ class DreamuEngine:
             print(f"Prompt: {prompt[:100]}{'...' if len(prompt) > 100 else ''}", flush=True)
             print(f"Seed: {seed}", flush=True)
 
-            # -- Execute pipeline ---------------------
             pipe_kwargs = {
                 "prompt": prompt,
                 "negative_prompt": negative_prompt,
@@ -609,26 +535,20 @@ class DreamuEngine:
                 "generator": generator,
             }
 
-            # ── Special Model Routing ───────────────
             is_omnigen = "OmniGen" in type(self.pipe).__name__
 
             if init_image is not None:
                 if is_omnigen:
                     pipe_kwargs["input_images"] = [init_image]
-                    # Auto-inject image tags if missing
-                    if "<img>" not in prompt:
-                        pipe_kwargs["prompt"] = f"<img><|image_1|></img> {prompt}"
                     pipe_kwargs["use_input_image_size_as_output"] = True
                 else:
                     pipe_kwargs["image"] = init_image
                     pipe_kwargs["strength"] = strength
             else:
-                # Text-to-Image dimensions
-                if not is_omnigen: # OmniGen often infers size or uses defaults
+                if not is_omnigen:
                     pipe_kwargs["width"] = self.max_resolution
                     pipe_kwargs["height"] = self.max_resolution
 
-            # Final safety: strip anything the model doesn't understand
             pipe_kwargs = self._get_pipe_params(pipe_kwargs)
 
             result = self.pipe(**pipe_kwargs)
