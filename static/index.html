@@ -15,7 +15,7 @@
     <style>
         :root {
             --bg-deep: #050208;
-            --bg-panel: rgba(15, 23, 42, 0.55);
+            --bg-panel: rgba(15, 23, 42, 0.6);
             --bg-input: rgba(30, 41, 59, 0.35);
             --bg-input-hover: rgba(30, 41, 59, 0.55);
             --border-subtle: rgba(255, 255, 255, 0.06);
@@ -38,7 +38,7 @@
             --radius-full: 9999px;
 
             --shadow-glow: 0 0 30px rgba(168, 85, 247, 0.15);
-            --shadow-deep: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --shadow-deep: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
 
         * {
@@ -59,7 +59,8 @@
         h1,
         h2,
         h3 {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
         }
 
         #automaton-bg {
@@ -91,9 +92,10 @@
 
         .control-panel {
             background: var(--bg-panel);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-right: 1px solid var(--border-subtle);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(168, 85, 247, 0.2);
+            box-shadow: var(--shadow-deep);
             padding: 2rem 1.75rem;
             display: flex;
             flex-direction: column;
@@ -136,14 +138,23 @@
         }
 
         .header h1 {
-            font-size: 2.75rem;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            background: linear-gradient(135deg, #fff, #cbd5e1);
+            font-size: 3.25rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 50%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            line-height: 1;
+            line-height: 0.95;
+            filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.2));
+            margin-bottom: 0.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+            user-select: none;
+        }
+
+        .header h1:hover {
+            filter: drop-shadow(0 0 35px rgba(168, 85, 247, 0.35));
         }
 
         .header-sub {
@@ -162,11 +173,12 @@
         }
 
         .header-sub span {
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.2em;
             color: var(--text-muted);
+            opacity: 0.8;
         }
 
         .byline {
@@ -188,19 +200,22 @@
         }
 
         .section-label {
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.18em;
+            letter-spacing: 0.2em;
             color: var(--text-muted);
             margin-bottom: 0.4rem;
+            opacity: 0.8;
         }
 
         .glass-select,
         .glass-input,
         .glass-textarea {
             width: 100%;
-            background: var(--bg-input);
+            background: rgba(30, 41, 59, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
             color: var(--text-primary);
@@ -275,11 +290,12 @@
         }
 
         .collapsible-trigger span {
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.15em;
             color: var(--text-muted);
+            opacity: 0.8;
         }
 
         .collapsible-content {
@@ -676,11 +692,14 @@
             width: 100%;
             max-width: 800px;
             margin-top: 1rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg-panel);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-subtle);
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(var(--bg-panel), var(--bg-panel)) padding-box,
+                        linear-gradient(to bottom right, rgba(168, 85, 247, 0.4), transparent) border-box;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid transparent;
             border-radius: var(--radius-md);
+            box-shadow: var(--shadow-deep);
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
@@ -751,11 +770,14 @@
             width: 100%;
             max-width: 800px;
             margin-top: 1rem;
-            padding: 1rem 1.25rem;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-subtle);
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)) padding-box,
+                        linear-gradient(to bottom right, rgba(168, 85, 247, 0.4), transparent) border-box;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid transparent;
             border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-deep);
             animation: slideUp 0.5s ease;
         }
 
@@ -1688,9 +1710,9 @@ v2.0.0 // RTX 4050 OPTIMIZED
 
                 const allBounds = getExclusionBounds();
                 ctx.beginPath();
-                ctx.fillStyle = '#a855f7';
+                ctx.fillStyle = '#ffffff';
                 ctx.shadowBlur = 5;
-                ctx.shadowColor = '#a855f7';
+                ctx.shadowColor = '#ffffff';
 
                 for (let x = 0; x < cols; x++) {
                     for (let y = 0; y < rows; y++) {
