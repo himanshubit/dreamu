@@ -1,18 +1,18 @@
 # DreamU: Universal Image Generation Engine
 
 ```text
-    ╔════════════════════════════════════════════════════════════╗
-    ║                                                            ║
-    ║   ██████╗ ██████╗ ███████╗ █████╗ ███╗   ███╗  ██╗   ██╗   ║
-    ║   ██╔══██╗██╔══██╗██╔════╝██╔══██╗████╗ ████║  ██║   ██║   ║
-    ║   ██║  ██║██████╔╝█████╗  ███████║██╔████╔██║  ██║   ██║   ║
-    ║   ██║  ██║██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║  ██║   ██║   ║
-    ║   ██████╔╝██║  ██║███████╗██║  ██║██║ ╚═╝ ██║  ╚██████╔    ║
-    ║   ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝   ╚═════╝    ║
-    ║                                                            ║
-    ║            T H E   F U T U R E   I S   O P E N             ║
-    ║                                                            ║
-    ╚════════════════════════════════════════════════════════════╝
+    ╔═════════════════════════════════════════════════════════════════╗
+    ║                                                                 ║
+    ║  ██████╗  ██████╗  ███████╗  █████╗  ███╗   ███╗   ██╗   ██╗    ║
+    ║  ██╔══██╗ ██╔══██╗ ██╔════╝ ██╔══██╗ ████╗ ████║   ██║   ██║    ║
+    ║  ██║  ██║ ██████╔╝ █████╗   ███████║ ██╔████╔██║   ██║   ██║    ║
+    ║  ██║  ██║ ██╔══██╗ ██╔══╝   ██╔══██║ ██║╚██╔╝██║   ██║   ██║    ║
+    ║  ██████╔╝ ██║  ██║ ███████╗ ██║  ██║ ██║ ╚═╝ ██║   ╚██████╔╝    ║
+    ║  ╚═════╝  ╚═╝  ╚═╝ ╚══════╝ ╚═╝  ╚═╝ ╚═╝     ╚═╝    ╚═════╝     ║
+    ║                                                                 ║
+    ║               T H E   F U T U R E   I S   O P E N               ║
+    ║                                                                 ║
+    ╚═════════════════════════════════════════════════════════════════╝
 ```
 
 **DreamU** is a modular, high-performance, universal image generation API backend powered by FastAPI and PyTorch. It features a config-driven architecture that seamlessly loads multiple model pipelines while strictly adhering to hardware constraints like our **6GB VRAM target**.
@@ -31,10 +31,12 @@ Don't waste time hunting for the right prompt modifiers. DreamU comes packed wit
 Every aesthetic is a one-click choice, allowing you to iterate faster and reach your vision without mastering complex prompt engineering.
 
 ### 💎 A Dashboard That Inspires
-Say goodbye to cluttered, technical interfaces. DreamU features a stunning **Glassmorphic Dashboard** designed for modern creators.
+Say goodbye to cluttered, technical interfaces. DreamU features a stunning **Glassmorphism 2.0 Dashboard** designed for modern creators.
+- **Developer-First Typography**: Clean, professional "Inter" font system for maximum readability.
+- **Glassmorphism 2.0**: Sophisticated backdrop blurs, refined shadows, and gradient-lit borders.
 - **Real-Time Evolution**: Watch your image emerge with live generation previews.
-- **Reactive Environment**: A dynamic "Game of Life" background that lives and breathes around your dashboard.
-- **Power User Tweaks**: Complex technical optimizations like VAE Tiling, Slicing, and CPU Offloading are presented as simple toggles, putting enterprise-grade control in the palm of your hand.
+- **Reactive Environment**: A monochromatic, high-contrast "Game of Life" background that lives and breathes around your dashboard.
+- **Power User Tweaks**: Complex technical optimizations like VAE Tiling, Slicing, and CPU Offloading are presented as simple toggles.
 
 ---
 
