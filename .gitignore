@@ -6,3 +6,7 @@ __pycache__/
 .DS_Store
 uploads/
 outputs/
+static/docs.html
+static/docs.js
+static/docs_gallery.css
+static/style.css
