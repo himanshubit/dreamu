@@ -860,6 +860,34 @@
         .mode-toggle button:hover:not(.active) {
             color: var(--text-secondary);
         }
+
+        .docs-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(168, 85, 247, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .docs-btn:hover {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--accent-purple);
+            color: white;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .docs-btn svg {
+            color: var(--accent-purple);
+        }
     </style>
 </head>
 
@@ -884,6 +912,11 @@
                 <div class="byline">
                     <a href="https://www.linkedin.com/in/himanshuxbit" target="_blank" rel="noopener">by Himanshu ↗</a>
                 </div>
+                <!-- Documentation Button -->
+                <a href="/static/docs.html" class="docs-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 0-4-4H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 1 4-4h6z"/></svg>
+                    Documentation
+                </a>
             </div>
 
             <!-- Mode Toggle (T2I / I2I) -->
