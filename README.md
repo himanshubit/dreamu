@@ -82,4 +82,24 @@ Visit: `http://127.0.0.1:8000`
 * **Unified Flow**: Switch between Text-to-Image and Image-to-Image modes seamlessly within the same modern interface.
 
 ---
+## 📜 Changelog
+
+### v2.1 (Current) - Optimizing the Engine
+*   **Aesthetic Evolution**: Transitioned technical documentation to a premium glassmorphic purple theme.
+*   **Master Console**: Integrated a functional Engine Master Console simulator for immersive documentation.
+*   **Production Grooming**: Aggressive removal of non-essential comments and docstrings for a lean codebase.
+*   **6GB Optimization**: Enhanced support for RTX 4050-class cards with NF4 Quantization and native LoRA fusion.
+
+### v2.0 - The Preservation Update
+*   **Style Expansion**: Added 45+ curated style presets (Cinema, Anime, 3D Render).
+*   **Intelligence Layer**: Integrated Gemini for smart prompt refinement and workflow assistance.
+*   **UI Revamp**: Launched the stunning Glassmorphic Dashboard with real-time generation previews.
+*   **Performance**: Added VAE Tiling, Slicing, and optimized CPU Offloading toggles.
+
+### v1.0 - Initial Ignition
+*   Modular model orchestration layer powered by FastAPI and PyTorch.
+*   Automated weight fusion and hardware-specific orchestration.
+*   Initial 6GB VRAM target implementation.
+
+---
 *Created by the future, for the creators.*
