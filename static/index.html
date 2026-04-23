@@ -428,6 +428,13 @@
             border-style: solid;
         }
 
+        .upload-zone.drag-over {
+            border-color: var(--accent-purple);
+            background: rgba(168, 85, 247, 0.15);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+            transform: scale(1.02);
+        }
+
         .upload-zone input[type="file"] {
             position: absolute;
             inset: 0;
@@ -1045,7 +1052,7 @@
             <!-- Upload Zone (I2I mode) -->
             <div class="upload-section" id="uploadSection">
                 <div class="section-label">Source Image</div>
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-zone" id="uploadZone">
                     <input type="file" id="fileInput" accept="image/*" onchange="onFileSelected(this)">
                     <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -1155,6 +1162,7 @@ v2.0.0 // RTX 4050 OPTIMIZED
         /* ── Init ──────────────────────────────── */
         document.addEventListener('DOMContentLoaded', async () => {
             initBackground();
+            initDragAndDrop();
             await Promise.all([fetchModels(), fetchPresets()]);
             updateCharCount('negPromptInput', 'negCount');
             updateUploadVisibility();
@@ -1318,7 +1326,7 @@ v2.0.0 // RTX 4050 OPTIMIZED
             const filename = document.getElementById('uploadFilename');
             const thumb = document.getElementById('uploadThumb');
 
-            if (input.files.length > 0) {
+            if (input.files && input.files.length > 0) {
                 const file = input.files[0];
                 zone.classList.add('has-file');
                 text.textContent = 'Image loaded';
@@ -1337,6 +1345,35 @@ v2.0.0 // RTX 4050 OPTIMIZED
                 filename.textContent = '';
                 thumb.style.display = 'none';
             }
+        }
+
+        function initDragAndDrop() {
+            const zone = document.getElementById('uploadZone');
+            const input = document.getElementById('fileInput');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(name => {
+                zone.addEventListener(name, e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(name => {
+                zone.addEventListener(name, () => zone.classList.add('drag-over'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(name => {
+                zone.addEventListener(name, () => zone.classList.remove('drag-over'), false);
+            });
+
+            zone.addEventListener('drop', e => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    input.files = files;
+                    onFileSelected(input);
+                }
+            }, false);
         }
 
         /* ── Status Polling ────────────────────── */
