@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+from huggingface_hub import snapshot_download
 
 if sys.platform == "win32":
     os.system("chcp 65001 >nul 2>&1")
@@ -145,6 +146,28 @@ def print_divider(label=""):
         print(f"  {DIM}{'─' * 50}{RESET}\n")
 
 
+def download_model_weights(repo, cache_dir, name):
+    print(f"    {CYAN}Initializing download for {BOLD}{name}{RESET}...")
+    try:
+        os.environ["HF_HOME"] = cache_dir
+        
+        # Handle SDXL Lightning special case
+        if repo == "ByteDance/SDXL-Lightning":
+            base_repo = "stabilityai/stable-diffusion-xl-base-1.0"
+            print(f"    {DIM}Note: SDXL Lightning requires the base SDXL model. Downloading base first...{RESET}")
+            snapshot_download(repo_id=base_repo, cache_dir=cache_dir)
+            print(f"    {DIM}Downloading Lightning LoRA weights...{RESET}")
+            snapshot_download(repo_id=repo, cache_dir=cache_dir)
+        else:
+            snapshot_download(repo_id=repo, cache_dir=cache_dir)
+            
+        print(f"    {GREEN}✓ Download complete for {name}!{RESET}\n")
+        return True
+    except Exception as e:
+        print(f"    {RED}✗ Download failed for {name}: {e}{RESET}\n")
+        return False
+
+
 def prompt_choice(options, prompt_text):
     for i, opt in enumerate(options, 1):
         marker = f"{CYAN}[{i}]{RESET}"
@@ -229,6 +252,30 @@ def run_setup():
         "t2i_models": T2I_MODELS,
         "i2i_models": I2I_MODELS,
     }
+
+    print_divider("STEP 5 — Model Readiness")
+    print(f"    {DIM}You can download models now to avoid waiting during the first run.{RESET}\n")
+    
+    downloaded_repos = set()
+    
+    # Prompt for T2I model
+    t2i_repo = t2i["repo"]
+    t2i_name = t2i["name"]
+    print(f"  {BOLD}Text-to-Image Model:{RESET} {CYAN}{t2i_name}{RESET}")
+    if prompt_yesno(f"⚡ Pre-download weights for '{t2i_name}' now?", default=True):
+        if download_model_weights(t2i_repo, cache_dir, t2i_name):
+            downloaded_repos.add(t2i_repo)
+    
+    # Prompt for I2I model
+    i2i_repo = i2i["repo"]
+    i2i_name = i2i["name"]
+    
+    if i2i_repo != t2i_repo:
+        print(f"\n  {BOLD}Image-to-Image Model:{RESET} {CYAN}{i2i_name}{RESET}")
+        if prompt_yesno(f"⚡ Pre-download weights for '{i2i_name}' now?", default=True):
+            download_model_weights(i2i_repo, cache_dir, i2i_name)
+    else:
+        print(f"\n    {DIM}Note: Image-to-Image model is the same as Text-to-Image. Skipping redundant prompt.{RESET}")
 
     try:
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:

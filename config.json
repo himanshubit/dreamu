@@ -1,6 +1,6 @@
 {
-  "default_t2i_model": "pixart-sigma",
-  "default_i2i_model": "omnigen",
+  "default_t2i_model": "sdxl-lightning",
+  "default_i2i_model": "sdxl-base",
   "force_vram_offload": true,
   "enable_vae_slicing": true,
   "enable_vae_tiling": true,
