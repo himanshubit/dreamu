@@ -138,7 +138,7 @@ def print_header():
 """
     print(header)
 
-
+# ⚡⚡⚡⚡⚡HOw is this Emoji .... Discord : @martian.him
 def print_divider(label=""):
     if label:
         print(f"\n  {PURPLE}{'━' * 4} {BOLD}{label} {RESET}{PURPLE}{'━' * 40}{RESET}\n")
