@@ -13,6 +13,26 @@ if sys.platform == "win32":
 
 T2I_MODELS = [
     {
+        "id": "juggernaut-xl-lightning",
+        "name": "Juggernaut XL Lightning",
+        "repo": "RunDiffusion/Juggernaut-XL-Lightning",
+        "desc": "Top-tier Photorealism & General — 4 steps",
+        "default_steps": 4,
+        "default_guidance": 1.5,
+        "quantization": None,
+        "size": "~ 6.5 GB",
+    },
+    {
+        "id": "dreamshaper-xl-lightning",
+        "name": "DreamShaper XL Lightning",
+        "repo": "Lykon/dreamshaper-xl-lightning",
+        "desc": "Best for Art & Illustration — 4-8 steps",
+        "default_steps": 6,
+        "default_guidance": 2.0,
+        "quantization": None,
+        "size": "~ 6.5 GB",
+    },
+    {
         "id": "sdxl-lightning",
         "name": "SDXL Lightning",
         "repo": "ByteDance/SDXL-Lightning",
@@ -20,6 +40,7 @@ T2I_MODELS = [
         "default_steps": 4,
         "default_guidance": 0.0,
         "quantization": None,
+        "size": "~ 7.0 GB",
     },
     {
         "id": "flux-nf4",
@@ -29,6 +50,7 @@ T2I_MODELS = [
         "default_steps": 4,
         "default_guidance": 0.0,
         "quantization": "nf4",
+        "size": "~ 11.2 GB",
     },
     {
         "id": "omnigen",
@@ -38,6 +60,7 @@ T2I_MODELS = [
         "default_steps": 20,
         "default_guidance": 4.5,
         "quantization": "8bit",
+        "size": "~ 3.8 GB",
     },
     {
         "id": "stable-cascade",
@@ -47,6 +70,7 @@ T2I_MODELS = [
         "default_steps": 20,
         "default_guidance": 4.0,
         "quantization": None,
+        "size": "~ 10.5 GB",
     },
     {
         "id": "pixart-sigma",
@@ -56,10 +80,33 @@ T2I_MODELS = [
         "default_steps": 20,
         "default_guidance": 4.5,
         "quantization": None,
+        "size": "~ 11.0 GB",
     },
 ]
 
 I2I_MODELS = [
+    {
+        "id": "juggernaut-xl-lightning",
+        "name": "Juggernaut XL Lightning",
+        "repo": "RunDiffusion/Juggernaut-XL-Lightning",
+        "desc": "Top-tier Photorealism & General — 4 steps",
+        "default_steps": 4,
+        "default_guidance": 1.5,
+        "default_strength": 0.60,
+        "quantization": None,
+        "size": "~ 6.5 GB",
+    },
+    {
+        "id": "dreamshaper-xl-lightning",
+        "name": "DreamShaper XL Lightning",
+        "repo": "Lykon/dreamshaper-xl-lightning",
+        "desc": "Best for Art & Illustration — 4-8 steps",
+        "default_steps": 6,
+        "default_guidance": 2.0,
+        "default_strength": 0.60,
+        "quantization": None,
+        "size": "~ 6.5 GB",
+    },
     {
         "id": "realvis-v4",
         "name": "RealVisXL V4.0",
@@ -69,6 +116,7 @@ I2I_MODELS = [
         "default_guidance": 6.0,
         "default_strength": 0.65,
         "quantization": None,
+        "size": "~ 6.5 GB",
     },
     {
         "id": "sdxl-base",
@@ -79,6 +127,7 @@ I2I_MODELS = [
         "default_guidance": 7.0,
         "default_strength": 0.60,
         "quantization": None,
+        "size": "~ 6.5 GB",
     },
     {
         "id": "omnigen",
@@ -88,6 +137,7 @@ I2I_MODELS = [
         "default_steps": 20,
         "default_guidance": 4.5,
         "quantization": "8bit",
+        "size": "~ 3.8 GB",
     },
     {
         "id": "sdxl-lightning",
@@ -97,6 +147,7 @@ I2I_MODELS = [
         "default_steps": 4,
         "default_guidance": 0.0,
         "quantization": None,
+        "size": "~ 7.0 GB",
     },
 ]
 
@@ -138,7 +189,7 @@ def print_header():
 """
     print(header)
 
-# ⚡⚡⚡⚡⚡HOw is this Emoji .... Discord : @martian.him
+# ⚡⚡⚡⚡⚡Drop a hii  .... Discord : @martian.him
 def print_divider(label=""):
     if label:
         print(f"\n  {PURPLE}{'━' * 4} {BOLD}{label} {RESET}{PURPLE}{'━' * 40}{RESET}\n")
@@ -172,8 +223,9 @@ def prompt_choice(options, prompt_text):
     for i, opt in enumerate(options, 1):
         marker = f"{CYAN}[{i}]{RESET}"
         name = f"{BOLD}{opt['name']}{RESET}"
+        size = f"{YELLOW}[{opt.get('size', 'Unknown')}]{RESET}"
         desc = f"{DIM}{opt['desc']}{RESET}"
-        print(f"    {marker}  {name}")
+        print(f"    {marker}  {name} {size}")
         print(f"         {desc}\n")
 
     while True:
