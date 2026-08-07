@@ -92,62 +92,6 @@ if not MODEL_REGISTRY:
         },
     }
 
-class GeminiBrain:
-
-    def __init__(self):
-        self.api_key = os.getenv("GEMINI_API_KEY")
-        self.client = None
-        if self.api_key:
-            try:
-                from google import genai
-                self.client = genai.Client(api_key=self.api_key)
-                print("Gemini Brain Connected!")
-            except Exception as e:
-                print(f"Gemini Connection Failed: {e}")
-
-    def enhance_prompt(self, pil_image, style_preset):
-        if not self.client:
-            return style_preset
-
-        try:
-            from google.genai import types
-
-            img_byte_arr = BytesIO()
-            pil_image.save(img_byte_arr, format='JPEG')
-            img_bytes = img_byte_arr.getvalue()
-
-            prompt = (
-                f"Analyze the main subject, pose, and composition of this image in detail. "
-                f"Then write a Stable Diffusion prompt to recreate this exact subject in the style of: '{style_preset}'. "
-                f"Include keywords for lighting, texture, and atmosphere. Keep it under 50 words."
-            )
-
-            response = self.client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[
-                    types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"),
-                    prompt
-                ]
-            )
-            return response.text.strip()
-        except Exception as e:
-            print(f"Gemini Vision Error: {e}")
-            return style_preset
-
-    def interpret_dream(self, style_name):
-        if not self.client:
-            return "Untitled Dream", "A generated reality."
-        try:
-            prompt = f"Write a mysterious 3-word title and a 1-sentence story for a {style_name} artwork. Format: Title | Story"
-            response = self.client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-            text = response.text.strip()
-            if "|" in text:
-                return text.split("|", 1)
-            return text, "A vision from the machine."
-        except Exception:
-            return "Untitled", "Processing complete."
-
-
 class DreamuEngine:
     def __init__(self):
         print("=" * 55)
@@ -158,7 +102,6 @@ class DreamuEngine:
 
         self.pipe = None
         self.current_model_id = None
-        self.gemini = GeminiBrain()
         self.max_resolution = CONFIG.get("max_resolution", 768)
         self.generation_available = HAS_TORCH
 
@@ -512,13 +455,8 @@ class DreamuEngine:
                 init_image = Image.open(image_path).convert("RGB")
                 init_image = self._resize_image(init_image)
 
-            # ── Gemini prompt enhancement ────────────
+            # ── Prompt variables ─────────────────────
             title, story = None, None
-            if preset and init_image:
-                print("Consulting Gemini Vision...", flush=True)
-                enhanced = self.gemini.enhance_prompt(init_image, preset)
-                prompt = f"{enhanced}, masterpiece, best quality, 8k uhd, high fidelity, (vivid colors:1.2)"
-                title, story = self.gemini.interpret_dream(preset)
 
             if not prompt.strip():
                 prompt = "masterpiece, best quality, highly detailed"
