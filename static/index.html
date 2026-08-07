@@ -917,6 +917,138 @@
         .docs-btn svg {
             color: var(--accent-purple);
         }
+        .preset-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .preset-item {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .preset-item:hover {
+            background: var(--bg-input-hover);
+            border-color: var(--border-focus);
+            color: white;
+        }
+
+        .preset-item.active {
+            background: rgba(168, 85, 247, 0.15);
+            border-color: var(--accent-purple);
+            color: white;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+        }
+        
+        .preset-item.hidden {
+            display: none !important;
+        }
+
+        .preset-explore-btn {
+            width: 100%;
+            padding: 0.65rem;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .preset-explore-btn:hover {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border-color: var(--border-focus);
+        }
+
+        /* Preset Modal Styles */
+        .preset-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .preset-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .preset-modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-focus);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .preset-modal-overlay.active .preset-modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .modal-category {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
     </style>
 </head>
 
@@ -994,9 +1126,11 @@
             <!-- Style Preset -->
             <div>
                 <div class="section-label">Style Preset</div>
-                <select class="glass-select" id="presetSelect" onchange="onPresetChange()">
-                    <option value="">— None (use custom prompt) —</option>
-                </select>
+                <div class="preset-grid" id="presetGrid">
+                    <!-- Populated by JS -->
+                </div>
+                <button class="preset-explore-btn" id="presetExploreBtn" onclick="openPresetModal()">Explore More Styles...</button>
+                <input type="hidden" id="presetSelect" value="" />
             </div>
 
             <!-- Advanced Settings (collapsible) -->
@@ -1152,6 +1286,19 @@ v2.0.0 // RTX 4050 OPTIMIZED
 
     </div>
 
+    <!-- Preset Modal -->
+    <div class="preset-modal-overlay" id="presetModal" onclick="if(event.target===this) closePresetModal()">
+        <div class="preset-modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Explore Styles</div>
+                <button class="close-btn" onclick="closePresetModal()">&times;</button>
+            </div>
+            <div id="modalPresetGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- ═══════════════ JAVASCRIPT ═══════════════ -->
     <script>
         /* ── State ─────────────────────────────── */
@@ -1209,23 +1356,85 @@ v2.0.0 // RTX 4050 OPTIMIZED
             }
         }
 
-        function populatePresetDropdown() {
-            const select = document.getElementById('presetSelect');
-            // Keep the first "None" option
-            select.innerHTML = '<option value="">— None (use custom prompt) —</option>';
+        let presetsExpanded = false;
 
+        function populatePresetDropdown() {
+            const grid = document.getElementById('presetGrid');
+            grid.innerHTML = '';
+            
+            // Add a "None" preset
+            const noneItem = document.createElement('div');
+            noneItem.className = 'preset-item active';
+            noneItem.textContent = 'None';
+            noneItem.dataset.value = '';
+            noneItem.onclick = () => selectPreset(noneItem);
+            grid.appendChild(noneItem);
+            
+            if (!presetsData || !presetsData.all) return;
+            
+            const topPresetIds = ['anim_japan', 'photo_fisheye', 'art_oil'];
+            let topPresets = presetsData.all.filter(p => topPresetIds.includes(p.id));
+            
+            topPresets.forEach((p) => {
+                const item = document.createElement('div');
+                item.className = 'preset-item';
+                item.textContent = p.label;
+                item.dataset.value = p.id;
+                item.onclick = () => selectPreset(item);
+                grid.appendChild(item);
+            });
+
+            // Populate Modal Grid
+            const modalGrid = document.getElementById('modalPresetGrid');
+            modalGrid.innerHTML = '';
             const cats = presetsData.categories;
             for (const [category, presets] of Object.entries(cats)) {
-                const group = document.createElement('optgroup');
-                group.label = category;
+                const catLabel = document.createElement('div');
+                catLabel.className = 'modal-category';
+                catLabel.textContent = category;
+                modalGrid.appendChild(catLabel);
+
+                const catGrid = document.createElement('div');
+                catGrid.className = 'preset-grid';
+                catGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(110px, 1fr))';
+                
                 presets.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.id;
-                    opt.textContent = p.label;
-                    group.appendChild(opt);
+                    const item = document.createElement('div');
+                    item.className = 'preset-item';
+                    item.textContent = p.label;
+                    item.dataset.value = p.id;
+                    item.onclick = () => {
+                        selectPreset(item);
+                        closePresetModal();
+                    };
+                    catGrid.appendChild(item);
                 });
-                select.appendChild(group);
+                modalGrid.appendChild(catGrid);
             }
+        }
+
+        function selectPreset(itemOrValue) {
+            let value = typeof itemOrValue === 'string' ? itemOrValue : itemOrValue.dataset.value;
+            
+            document.querySelectorAll('.preset-item').forEach(el => {
+                if (el.dataset.value === value) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            
+            const hiddenInput = document.getElementById('presetSelect');
+            hiddenInput.value = value;
+            onPresetChange();
+        }
+
+        function openPresetModal() {
+            document.getElementById('presetModal').classList.add('active');
+        }
+
+        function closePresetModal() {
+            document.getElementById('presetModal').classList.remove('active');
         }
 
         /* ── Mode Switching ────────────────────── */
@@ -1288,12 +1497,15 @@ v2.0.0 // RTX 4050 OPTIMIZED
             if (presetId && presetsData) {
                 const preset = presetsData.all.find(p => p.id === presetId);
                 if (preset) {
-                    // We don't fill the prompt — the backend merges preset prompts.
-                    // But give user feedback
                     const promptInput = document.getElementById('promptInput');
                     if (!promptInput.value.trim()) {
                         promptInput.placeholder = `Style: ${preset.label} — add custom details or leave empty`;
                     }
+                }
+            } else {
+                const promptInput = document.getElementById('promptInput');
+                if (!promptInput.value.trim()) {
+                    promptInput.placeholder = "Describe your image... A cyberpunk cityscape at sunset, neon reflections on wet streets";
                 }
             }
         }
