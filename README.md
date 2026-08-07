@@ -94,7 +94,6 @@ Visit: `http://127.0.0.1:8000`
 
 ### v2.0 - The Preservation Update
 *   **Style Expansion**: Added 45+ curated style presets (Cinema, Anime, 3D Render).
-*   **Intelligence Layer**: Integrated Gemini for smart prompt refinement and workflow assistance.
 *   **UI Revamp**: Launched the stunning Glassmorphic Dashboard with real-time generation previews.
 *   **Performance**: Added VAE Tiling, Slicing, and optimized CPU Offloading toggles.
 
