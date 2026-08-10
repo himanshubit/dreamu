@@ -174,8 +174,8 @@ class DreamuEngine:
                 )
 
             # ── Select the correct pipeline class ────
-            if model_id == "flux-nf4":
-                pipe = self._load_flux(repo, **quant_kwargs)
+            if "flux" in model_id.lower():
+                pipe = self._load_flux(repo, mode=actual_type, **quant_kwargs)
             elif model_id == "omnigen":
                 pipe = self._load_omnigen(repo, **quant_kwargs)
             elif model_id == "stable-cascade":
@@ -331,16 +331,24 @@ class DreamuEngine:
             print("   Falling back to AutoPipeline...")
             return self._load_sdxl_text2img(repo, **kwargs)
 
-    def _load_flux(self, repo, **kwargs):
+    def _load_flux(self, repo, mode="t2i", **kwargs):
         try:
-            from diffusers import FluxPipeline
-
-            pipe = FluxPipeline.from_pretrained(
-                repo,
-                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
-                low_cpu_mem_usage=True,
-                **kwargs
-            )
+            if mode == "i2i":
+                from diffusers import FluxImg2ImgPipeline
+                pipe = FluxImg2ImgPipeline.from_pretrained(
+                    repo,
+                    torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
+                    low_cpu_mem_usage=True,
+                    **kwargs
+                )
+            else:
+                from diffusers import FluxPipeline
+                pipe = FluxPipeline.from_pretrained(
+                    repo,
+                    torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
+                    low_cpu_mem_usage=True,
+                    **kwargs
+                )
             return pipe
         except Exception as e:
             print(f"   WARNING: FLUX loading failed: {e}")

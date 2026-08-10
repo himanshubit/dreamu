@@ -13,6 +13,36 @@ if sys.platform == "win32":
 
 T2I_MODELS = [
     {
+        "id": "flux-dev",
+        "name": "FLUX.1 [dev]",
+        "repo": "black-forest-labs/FLUX.1-dev",
+        "desc": "Top Tier (24GB+ VRAM) — State-of-the-art 12B model",
+        "default_steps": 28,
+        "default_guidance": 3.5,
+        "quantization": None,
+        "size": "~ 23.8 GB",
+    },
+    {
+        "id": "playground-v2.5",
+        "name": "Playground v2.5",
+        "repo": "playgroundai/playground-v2.5-1024px-aesthetic",
+        "desc": "Mid-High Tier (16GB+ VRAM) — Aesthetically tuned SDXL",
+        "default_steps": 25,
+        "default_guidance": 3.0,
+        "quantization": None,
+        "size": "~ 6.5 GB",
+    },
+    {
+        "id": "flux-schnell",
+        "name": "FLUX.1 [schnell]",
+        "repo": "black-forest-labs/FLUX.1-schnell",
+        "desc": "Mid-Range Tier (8-12GB VRAM) — 4-step distilled FLUX",
+        "default_steps": 4,
+        "default_guidance": 0.0,
+        "quantization": None,
+        "size": "~ 23.8 GB",
+    },
+    {
         "id": "juggernaut-xl-lightning",
         "name": "Juggernaut XL Lightning",
         "repo": "RunDiffusion/Juggernaut-XL-Lightning",
@@ -85,6 +115,39 @@ T2I_MODELS = [
 ]
 
 I2I_MODELS = [
+    {
+        "id": "flux-dev",
+        "name": "FLUX.1 [dev]",
+        "repo": "black-forest-labs/FLUX.1-dev",
+        "desc": "Top Tier (24GB+ VRAM) — State-of-the-art 12B model",
+        "default_steps": 28,
+        "default_guidance": 3.5,
+        "default_strength": 0.65,
+        "quantization": None,
+        "size": "~ 23.8 GB",
+    },
+    {
+        "id": "playground-v2.5",
+        "name": "Playground v2.5",
+        "repo": "playgroundai/playground-v2.5-1024px-aesthetic",
+        "desc": "Mid-High Tier (16GB+ VRAM) — Aesthetically tuned SDXL",
+        "default_steps": 25,
+        "default_guidance": 3.0,
+        "default_strength": 0.60,
+        "quantization": None,
+        "size": "~ 6.5 GB",
+    },
+    {
+        "id": "flux-schnell",
+        "name": "FLUX.1 [schnell]",
+        "repo": "black-forest-labs/FLUX.1-schnell",
+        "desc": "Mid-Range Tier (8-12GB VRAM) — 4-step distilled FLUX",
+        "default_steps": 4,
+        "default_guidance": 0.0,
+        "default_strength": 0.65,
+        "quantization": None,
+        "size": "~ 23.8 GB",
+    },
     {
         "id": "juggernaut-xl-lightning",
         "name": "Juggernaut XL Lightning",
