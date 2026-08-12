@@ -36,6 +36,8 @@ CONFIG = load_config()
 
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
+os.makedirs("outputs/pics", exist_ok=True)
+os.makedirs("outputs/details", exist_ok=True)
 
 engine = None
 
@@ -117,9 +119,20 @@ class GenerationRequest(BaseModel):
 
 # -- Routes -------------------------------------------
 
+@app.get("/docs")
+async def serve_docs():
+    return FileResponse("static/docs.html")
+
+
+@app.get("/documentation.md")
+async def serve_documentation_md():
+    return FileResponse("documentation.md", media_type="text/markdown")
+
+
 @app.get("/")
 async def serve_index():
     return FileResponse("static/index.html")
+
 
 
 @app.get("/api/models")
@@ -194,6 +207,37 @@ async def get_status():
     }
 
 
+@app.get("/api/history")
+async def get_history():
+    files = []
+    if os.path.exists("outputs/pics"):
+        for filename in os.listdir("outputs/pics"):
+            if filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                filepath = os.path.join("outputs/pics", filename)
+                
+                metadata = {}
+                base_name = os.path.splitext(filename)[0]
+                json_path = os.path.join("outputs/details", f"{base_name}.json")
+                if os.path.exists(json_path):
+                    try:
+                        with open(json_path, "r", encoding="utf-8") as jf:
+                            metadata = json.load(jf)
+                    except Exception:
+                        pass
+
+                files.append({
+                    "url": f"/outputs/pics/{filename}",
+                    "name": filename,
+                    "time": os.path.getmtime(filepath),
+                    "prompt": metadata.get("prompt", ""),
+                    "model_id": metadata.get("model_id", ""),
+                    "seed": metadata.get("seed", "")
+                })
+    # Sort by time descending
+    files.sort(key=lambda x: x["time"], reverse=True)
+    return {"history": files}
+
+
 @app.post("/api/generate")
 async def generate_image(
     prompt: str = Form(""),
@@ -262,12 +306,20 @@ async def generate_image(
 
     unique_id = str(uuid.uuid4())[:8]
     output_filename = f"dream_{unique_id}.png"
-    output_path = f"outputs/{output_filename}"
+    output_path = f"outputs/pics/{output_filename}"
     output_image.save(output_path)
+
+    metadata_filename = f"dream_{unique_id}.json"
+    metadata_path = f"outputs/details/{metadata_filename}"
+    try:
+        with open(metadata_path, "w", encoding="utf-8") as f:
+            json.dump({"prompt": final_prompt, "model_id": model_id, "seed": result.get("seed")}, f)
+    except Exception as e:
+        print(f"Failed to save metadata: {e}")
 
     return {
         "status": "success",
-        "image_url": f"/outputs/{output_filename}",
+        "image_url": f"/outputs/pics/{output_filename}",
         "seed": result.get("seed"),
         "model_id": result.get("model_id"),
         "time_seconds": result.get("time_seconds"),
