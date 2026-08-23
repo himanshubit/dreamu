@@ -5,6 +5,14 @@ import uuid
 import time
 from contextlib import asynccontextmanager
 from typing import Optional
+import psutil
+
+try:
+    import pynvml
+    pynvml.nvmlInit()
+    HAS_NVML = True
+except Exception:
+    HAS_NVML = False
 
 import uvicorn
 from fastapi import FastAPI, File, Form, UploadFile
@@ -204,6 +212,74 @@ async def get_status():
             "force_offload": CONFIG.get("force_vram_offload"),
             "max_resolution": CONFIG.get("max_resolution"),
         },
+    }
+
+
+@app.get("/api/system_stats")
+async def get_system_stats():
+    cpu_percent = psutil.cpu_percent(interval=None)
+    cpu_freq = psutil.cpu_freq()
+    cpu_freq_mhz = int(cpu_freq.current) if cpu_freq else 0
+    
+    mem = psutil.virtual_memory()
+    mem_percent = mem.percent
+    mem_used_gb = mem.used / (1024 ** 3)
+    mem_total_gb = mem.total / (1024 ** 3)
+    
+    gpu_name = "N/A"
+    gpu_usage_percent = 0.0
+    gpu_mem_used_mb = 0.0
+    gpu_mem_total_mb = 0.0
+    gpu_freq_mhz = 0
+    gpu_temp_c = 0
+    
+    if HAS_NVML:
+        try:
+            handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+            gpu_name = pynvml.nvmlDeviceGetName(handle)
+            if isinstance(gpu_name, bytes):
+                gpu_name = gpu_name.decode("utf-8")
+                
+            util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            gpu_usage_percent = util.gpu
+            
+            mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            gpu_mem_used_mb = mem_info.used / (1024 ** 2)
+            gpu_mem_total_mb = mem_info.total / (1024 ** 2)
+            
+            gpu_freq_mhz = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS)
+            gpu_temp_c = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+        except Exception:
+            pass
+            
+    if gpu_name == "N/A":
+        try:
+            import torch
+            if torch.cuda.is_available():
+                gpu_name = torch.cuda.get_device_name(0)
+                gpu_mem_used_mb = torch.cuda.memory_allocated(0) / (1024 ** 2)
+                gpu_mem_total_mb = torch.cuda.get_device_properties(0).total_memory / (1024 ** 2)
+        except Exception:
+            pass
+            
+    return {
+        "cpu": {
+            "usage_percent": cpu_percent,
+            "freq_mhz": cpu_freq_mhz,
+        },
+        "memory": {
+            "usage_percent": mem_percent,
+            "used_gb": round(mem_used_gb, 1),
+            "total_gb": round(mem_total_gb, 1),
+        },
+        "gpu": {
+            "name": gpu_name,
+            "usage_percent": gpu_usage_percent,
+            "mem_used_mb": round(gpu_mem_used_mb, 1),
+            "mem_total_mb": round(gpu_mem_total_mb, 1),
+            "freq_mhz": gpu_freq_mhz,
+            "temp_c": gpu_temp_c,
+        }
     }
 
 

@@ -26,8 +26,8 @@
             --accent-pink: #ec4899;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --text-dim: #475569;
+            --text-muted: #8492a6;
+            --text-dim: #64748b;
             --success: #34d399;
             --warning: #fbbf24;
             --danger: #f87171;
@@ -54,6 +54,11 @@
             overflow-x: hidden;
             overflow-y: auto;
             min-height: 100vh;
+        }
+
+        ::selection {
+            background: var(--accent-purple);
+            color: white;
         }
 
         h1,
@@ -115,20 +120,20 @@
             }
         }
 
-        .control-panel::-webkit-scrollbar {
+        ::-webkit-scrollbar {
             width: 4px;
         }
 
-        .control-panel::-webkit-scrollbar-track {
+        ::-webkit-scrollbar-track {
             background: transparent;
         }
 
-        .control-panel::-webkit-scrollbar-thumb {
+        ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.08);
             border-radius: 100px;
         }
 
-        .control-panel::-webkit-scrollbar-thumb:hover {
+        ::-webkit-scrollbar-thumb:hover {
             background: rgba(168, 85, 247, 0.4);
         }
 
@@ -141,10 +146,7 @@
             font-size: 3.25rem;
             font-weight: 800;
             letter-spacing: -0.05em;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 50%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: white;
             line-height: 0.95;
             filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.2));
             margin-bottom: 0.5rem;
@@ -237,7 +239,7 @@
         .glass-input:focus,
         .glass-textarea:focus {
             border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.4);
         }
 
         .glass-select {
@@ -473,9 +475,70 @@
             display: none;
         }
 
+        .system-stats {
+            position: fixed;
+            bottom: 2rem;
+            left: calc(420px + (100vw - 420px) / 2);
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem 1.5rem;
+            box-shadow: var(--shadow-glow);
+            display: flex;
+            flex-direction: row;
+            gap: 1.5rem;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 1024px) {
+            .system-stats {
+                left: 50%;
+            }
+        }
+
+        .stat-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 130px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stat-bar-container {
+            flex: 1;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .stat-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-purple);
+            transition: width 0.3s ease;
+        }
+
+        .stat-value {
+            width: 35px;
+            text-align: right;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
         .generate-btn {
             width: 100%;
-            padding: 1rem;
+            padding: 1.25rem;
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: var(--radius-full);
             background: linear-gradient(135deg, var(--accent-indigo), var(--accent-violet), var(--accent-pink));
@@ -536,7 +599,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 2rem 2rem 7rem 2rem;
             position: relative;
             min-height: 100vh;
         }
@@ -785,7 +848,7 @@
             border: 1px solid transparent;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-deep);
-            animation: slideUp 0.5s ease;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .story-panel.visible {
@@ -987,7 +1050,7 @@
             z-index: 9999;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .preset-modal-overlay.active {
@@ -1005,7 +1068,7 @@
             max-height: 80vh;
             overflow-y: auto;
             transform: scale(0.8);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
@@ -1058,7 +1121,7 @@
             z-index: 9998;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .history-drawer-overlay.active {
@@ -1075,7 +1138,7 @@
             border-left: 1px solid rgba(168, 85, 247, 0.2);
             box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
             z-index: 9999;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
         }
@@ -1109,9 +1172,7 @@
             flex-grow: 1;
         }
         
-        .history-grid::-webkit-scrollbar { width: 4px; }
-        .history-grid::-webkit-scrollbar-track { background: transparent; }
-        .history-grid::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 100px; }
+        /* history-grid scrollbars removed (handled globally) */
         
         .history-item {
             position: relative;
@@ -1360,6 +1421,8 @@
                 <div class="status-dot"></div>
                 <span id="statusText">Ready — no model loaded</span>
             </div>
+            
+
 
             <!-- Generate Button -->
             <button class="generate-btn" id="generateBtn" onclick="generate()">
@@ -1437,6 +1500,38 @@ v2.0.0 // RTX 4050 OPTIMIZED
                     <span id="storyTitle"></span>
                 </div>
                 <p class="story-text" id="storyText"></p>
+            </div>
+        </div>
+        
+        <!-- System Stats (Floating) -->
+        <div class="system-stats" id="systemStats" style="display: none;">
+            <div class="stat-row">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="stat-label">CPU (<span id="sysCpuFreq">0</span> MHz)</span>
+                    <span class="stat-value" id="sysCpuVal">0%</span>
+                </div>
+                <div class="stat-bar-container"><div class="stat-bar" id="sysCpuBar"></div></div>
+            </div>
+            <div class="stat-row">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="stat-label">RAM (<span id="sysMemUsed">0</span>/<span id="sysMemTotal">0</span>GB)</span>
+                    <span class="stat-value" id="sysMemVal">0%</span>
+                </div>
+                <div class="stat-bar-container"><div class="stat-bar" id="sysMemBar"></div></div>
+            </div>
+            <div class="stat-row" id="gpuStatRow">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="stat-label">GPU <span id="sysGpuName">N/A</span> (<span id="sysGpuTemp">0</span>°C, <span id="sysGpuFreq">0</span>MHz)</span>
+                    <span class="stat-value" id="sysGpuVal">0%</span>
+                </div>
+                <div class="stat-bar-container"><div class="stat-bar" id="sysGpuBar"></div></div>
+            </div>
+            <div class="stat-row" id="gpuMemRow">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="stat-label">VRAM (<span id="sysVramUsed">0</span>/<span id="sysVramTotal">0</span>MB)</span>
+                    <span class="stat-value" id="sysVramVal">0%</span>
+                </div>
+                <div class="stat-bar-container"><div class="stat-bar" id="sysVramBar"></div></div>
             </div>
         </div>
 
@@ -2245,6 +2340,47 @@ v2.0.0 // RTX 4050 OPTIMIZED
                 grid.innerHTML = '<div style="color: var(--danger); font-size: 0.8rem;">Failed to load history.</div>';
             }
         }
+        
+        async function fetchSystemStats() {
+            try {
+                const res = await fetch('/api/system_stats');
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                document.getElementById('systemStats').style.display = 'flex';
+                
+                document.getElementById('sysCpuFreq').textContent = data.cpu.freq_mhz;
+                document.getElementById('sysCpuBar').style.width = data.cpu.usage_percent + '%';
+                document.getElementById('sysCpuVal').textContent = Math.round(data.cpu.usage_percent) + '%';
+                
+                document.getElementById('sysMemUsed').textContent = data.memory.used_gb;
+                document.getElementById('sysMemTotal').textContent = data.memory.total_gb;
+                document.getElementById('sysMemBar').style.width = data.memory.usage_percent + '%';
+                document.getElementById('sysMemVal').textContent = Math.round(data.memory.usage_percent) + '%';
+                
+                if (data.gpu.name !== 'N/A') {
+                    document.getElementById('sysGpuName').textContent = data.gpu.name;
+                    document.getElementById('sysGpuFreq').textContent = data.gpu.freq_mhz;
+                    document.getElementById('sysGpuTemp').textContent = data.gpu.temp_c;
+                    document.getElementById('sysGpuBar').style.width = data.gpu.usage_percent + '%';
+                    document.getElementById('sysGpuVal').textContent = Math.round(data.gpu.usage_percent) + '%';
+                    
+                    document.getElementById('sysVramUsed').textContent = data.gpu.mem_used_mb;
+                    document.getElementById('sysVramTotal').textContent = data.gpu.mem_total_mb;
+                    const vramPercent = data.gpu.mem_total_mb > 0 ? (data.gpu.mem_used_mb / data.gpu.mem_total_mb) * 100 : 0;
+                    document.getElementById('sysVramBar').style.width = vramPercent + '%';
+                    document.getElementById('sysVramVal').textContent = Math.round(vramPercent) + '%';
+                } else {
+                    document.getElementById('gpuStatRow').style.display = 'none';
+                    document.getElementById('gpuMemRow').style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Failed to fetch system stats:', err);
+            }
+        }
+        
+        setInterval(fetchSystemStats, 1500);
+        setTimeout(fetchSystemStats, 500);
     </script>
 </body>
 
