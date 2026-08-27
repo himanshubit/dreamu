@@ -3,6 +3,7 @@ import json
 import shutil
 import uuid
 import time
+import asyncio
 from contextlib import asynccontextmanager
 from typing import Optional
 import psutil
@@ -15,7 +16,7 @@ except Exception:
     HAS_NVML = False
 
 import uvicorn
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
@@ -48,6 +49,7 @@ os.makedirs("outputs/pics", exist_ok=True)
 os.makedirs("outputs/details", exist_ok=True)
 
 engine = None
+progress_state = {"step": 0, "total": 0, "status": "idle"}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -215,6 +217,22 @@ async def get_status():
     }
 
 
+@app.websocket("/api/ws/progress")
+async def websocket_progress(ws: WebSocket):
+    await ws.accept()
+    try:
+        while True:
+            await ws.send_json(progress_state)
+            await asyncio.sleep(0.1)
+    except WebSocketDisconnect:
+        pass
+    except Exception:
+        try:
+            await ws.close()
+        except Exception:
+            pass
+
+
 @app.get("/api/system_stats")
 async def get_system_stats():
     cpu_percent = psutil.cpu_percent(interval=None)
@@ -315,7 +333,7 @@ async def get_history():
 
 
 @app.post("/api/generate")
-async def generate_image(
+def generate_image(
     prompt: str = Form(""),
     negative_prompt: str = Form(""),
     model_id: str = Form(CONFIG.get("default_t2i_model", "sdxl-turbo")),
@@ -355,6 +373,15 @@ async def generate_image(
         else:
             final_prompt = preset_prompt
 
+    def _progress_cb(step, total, status):
+        progress_state["step"] = step
+        progress_state["total"] = total
+        progress_state["status"] = status
+
+    progress_state["step"] = 0
+    progress_state["total"] = num_inference_steps
+    progress_state["status"] = "starting"
+
     result = engine.generate(
         prompt=final_prompt,
         negative_prompt=negative_prompt,
@@ -365,7 +392,10 @@ async def generate_image(
         seed=seed,
         image_path=image_path,
         preset=preset_key if (preset_key and image_path) else None,
+        progress_callback=_progress_cb,
     )
+
+    progress_state["status"] = "idle"
 
     if result.get("error"):
         return JSONResponse(

@@ -1879,15 +1879,7 @@ v2.0.0 // RTX 4050 OPTIMIZED
         /* ── CLI State Management ───────────────── */
         let progressInterval = null;
         let currentProgress = 0;
-        const CLI_MESSAGES = [
-            'initializing pipeline',
-            'loading model weights',
-            'compiling scheduler',
-            'preparing latent space',
-            'running denoising pass',
-            'applying vae decode',
-            'rendering final output',
-        ];
+        let progressWs = null;
 
         function showCliIdle() {
             const container = document.getElementById('cli-container');
@@ -1911,7 +1903,7 @@ v2.0.0 // RTX 4050 OPTIMIZED
             loading.classList.add('active');
             currentProgress = 0;
             updateProgressBar(0);
-            updateStatusLine(CLI_MESSAGES[0]);
+            updateStatusLine('initializing pipeline');
         }
 
         function showCliResult() {
@@ -1940,41 +1932,36 @@ v2.0.0 // RTX 4050 OPTIMIZED
             }
         }
 
-        function startAsymptoticProgress() {
-            let messageIndex = 0;
-            const startTime = Date.now();
+        function startWebSocketProgress() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            progressWs = new WebSocket(`${protocol}//${window.location.host}/api/ws/progress`);
 
-            progressInterval = setInterval(() => {
-                const elapsed = (Date.now() - startTime) / 1000;
+            progressWs.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    const { step, total, status } = data;
 
-                // Asymptotic progress: fast to 80%, creep to 95%
-                if (currentProgress < 60) {
-                    currentProgress += 2.5 + Math.random() * 1.5;
-                } else if (currentProgress < 80) {
-                    currentProgress += 0.8 + Math.random() * 0.5;
-                } else if (currentProgress < 95) {
-                    currentProgress += 0.15 + Math.random() * 0.1;
+                    if (status === 'idle') return;
+
+                    if (total > 0 && step > 0) {
+                        currentProgress = Math.round((step / total) * 100);
+                    }
+                    updateProgressBar(Math.min(currentProgress, 99));
+                    updateStatusLine(`${status} (${step}/${total})`);
+                } catch (e) {
+                    // ignore parse errors
                 }
+            };
 
-                currentProgress = Math.min(currentProgress, 95);
-                updateProgressBar(currentProgress);
-
-                // Cycle status messages based on progress
-                const newIndex = Math.min(
-                    Math.floor((currentProgress / 100) * CLI_MESSAGES.length),
-                    CLI_MESSAGES.length - 1
-                );
-                if (newIndex !== messageIndex) {
-                    messageIndex = newIndex;
-                    updateStatusLine(CLI_MESSAGES[messageIndex]);
-                }
-            }, 200);
+            progressWs.onerror = () => {
+                // silently ignore — the HTTP request will still complete
+            };
         }
 
         function stopProgress() {
-            if (progressInterval) {
-                clearInterval(progressInterval);
-                progressInterval = null;
+            if (progressWs) {
+                try { progressWs.close(); } catch(e) {}
+                progressWs = null;
             }
         }
 
@@ -2014,7 +2001,7 @@ v2.0.0 // RTX 4050 OPTIMIZED
             storyPanel.classList.remove('visible');
 
             showCliLoading();
-            startAsymptoticProgress();
+            startWebSocketProgress();
 
             // Build FormData
             const formData = new FormData();

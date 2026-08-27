@@ -435,9 +435,12 @@ class DreamuEngine:
         seed = kwargs.get("seed", -1)
         image_path = kwargs.get("image_path", None)
         preset = kwargs.get("preset", None)
+        progress_callback = kwargs.get("progress_callback", None)
 
         try:
             # ── Pre-generation VRAM cleanup ──────────
+            if progress_callback:
+                progress_callback(0, num_inference_steps, "cleaning vram")
             gc.collect()
             if self.device == "cuda":
                 torch.cuda.empty_cache()
@@ -445,6 +448,8 @@ class DreamuEngine:
             # ── Load model if needed ─────────────────
             # Dynamically determine the mode based on presence of init_image
             target_mode = "i2i" if image_path else "t2i"
+            if progress_callback:
+                progress_callback(0, num_inference_steps, "loading model weights")
             if not self.load_model(model_id, mode=target_mode):
                 return {"error": f"Failed to load model '{model_id}' in {target_mode} mode."}
 
@@ -453,6 +458,8 @@ class DreamuEngine:
             model_type = target_mode
 
             # ── Prepare seed ─────────────────────────
+            if progress_callback:
+                progress_callback(0, num_inference_steps, "preparing latent space")
             if seed < 0:
                 seed = random.randint(0, 2**32 - 1)
             generator = torch.Generator(device="cpu").manual_seed(seed)
@@ -481,6 +488,17 @@ class DreamuEngine:
                 "generator": generator,
             }
 
+            # ── Step callback for real-time progress ──
+            if progress_callback:
+                def step_callback(pipe, step_index, timestep, callback_kwargs):
+                    current_step = step_index + 1
+                    if current_step < num_inference_steps:
+                        progress_callback(current_step, num_inference_steps, "running denoising pass")
+                    else:
+                        progress_callback(current_step, num_inference_steps, "applying vae decode")
+                    return callback_kwargs
+                pipe_kwargs["callback_on_step_end"] = step_callback
+
             is_omnigen = "OmniGen" in type(self.pipe).__name__
 
             if init_image is not None:
@@ -495,6 +513,9 @@ class DreamuEngine:
                     pipe_kwargs["width"] = self.max_resolution
                     pipe_kwargs["height"] = self.max_resolution
 
+            if progress_callback:
+                progress_callback(0, num_inference_steps, "compiling scheduler")
+
             pipe_kwargs = self._get_pipe_params(pipe_kwargs)
 
             result = self.pipe(**pipe_kwargs)
@@ -503,6 +524,9 @@ class DreamuEngine:
             elapsed = time.time() - start_time
             vram = self.get_vram_usage()
             print(f"DONE in {elapsed:.1f}s | VRAM: {vram:.0f} MB\n", flush=True)
+
+            if progress_callback:
+                progress_callback(num_inference_steps, num_inference_steps, "generation complete")
 
             return {
                 "image": image,
@@ -517,8 +541,12 @@ class DreamuEngine:
         except torch.cuda.OutOfMemoryError:
             print("OOM Error! Unloading model and flushing VRAM...", flush=True)
             self.unload_model()
+            if progress_callback:
+                progress_callback(0, 0, "oom_error")
             return {"error": "Out of VRAM. Model unloaded. Try fewer steps or a smaller model."}
 
         except Exception as e:
             print(f"Error: Generation Error: {e}", flush=True)
+            if progress_callback:
+                progress_callback(0, 0, "error")
             return {"error": str(e)}

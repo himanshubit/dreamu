@@ -11,4 +11,6 @@ static/docs.js
 static/docs.css
 Dreamu_Documentation_Prompt.md
 documentation.md
-
+agent.md
+.impeccable
+node_modules/
