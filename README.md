@@ -51,6 +51,7 @@ Say goodbye to cluttered, technical interfaces. DreamU features a stunning **Gla
 2. **The One-Click Dependency Sync:**
    ```powershell
    pip install -r requirements.txt
+   npm install
    ```
 
 3. **GPU Ignition:**
@@ -86,7 +87,12 @@ Visit: `http://127.0.0.1:8000`
 ---
 ## 📜 Changelog
 
-### v2.1 (Current) - Optimizing the Engine
+### v2.2 (Current) - Live Feedback & Structure
+*   **Live Previews**: Introduced real-time WebSocket progress tracking for live generation previews.
+*   **Structural Refinement**: Separated outputs into `pics` and `details` directories for better file management.
+*   **Dependency Modernization**: Added Node.js `package.json` to manage frontend dependencies.
+
+### v2.1 - Optimizing the Engine
 *   **Aesthetic Evolution**: Transitioned technical documentation to a premium glassmorphic purple theme.
 *   **Master Console**: Integrated a functional Engine Master Console simulator for immersive documentation.
 *   **Production Grooming**: Aggressive removal of non-essential comments and docstrings for a lean codebase.
