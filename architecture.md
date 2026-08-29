@@ -20,6 +20,7 @@ This file serves as the entry point and API gateway.
   - `GET /api/presets`: Returns a categorized list of style presets.
   - `GET /api/status`: Returns current engine status, loaded model, and VRAM usage.
   - `POST /api/generate`: Accepts form data (prompt, negative_prompt, model_id, etc.) and optional image uploads, orchestrates the generation process via `DreamuEngine`, and saves the output.
+  - `WS /api/ws/progress`: Provides real-time WebSocket communication for tracking generation progress.
 
 ### 2. `ai_engine.py` (Orchestration & Generation Layer)
 This file contains the core AI logic, managing model loading, VRAM, and generation.
@@ -29,7 +30,7 @@ This file contains the core AI logic, managing model loading, VRAM, and generati
   - **Memory Management:** Implements garbage collection (`gc.collect()`), CUDA cache clearing, and advanced offloading techniques (Sequential CPU Offload, VAE Slicing/Tiling).
   - **Pipeline Support:** Supports multiple specialized Diffusers pipelines (e.g., `AutoPipelineForText2Image`, `FluxPipeline`, `OmniGenPipeline`, `PixArtSigmaPipeline`).
   - **Quantization:** Supports loading models in 8-bit or NF4 (4-bit) for low VRAM usage.
-  - **Generation Process:** Handles prompt construction, image resizing (for I2I), and invokes the underlying diffusers pipeline.
+  - **Generation Process:** Handles prompt construction, image resizing (for I2I), invokes the underlying diffusers pipeline, and emits real-time progress via WebSocket callbacks.
 
 ### 3. `config.json` (Configuration)
 Defines the operational parameters and available models.
@@ -69,7 +70,7 @@ The configuration defines a curated set of models tailored to run within the 6GB
    - **Model Loading:** Dynamically loads the requested model pipeline into memory (applying quantization and CPU offloading if configured).
    - **Inference:** Executes the diffusers pipeline to generate the image.
 4. **Response:** 
-   - Image is returned to `main.py`, saved to the `outputs/` directory.
+   - Image is returned to `main.py` and saved to the `outputs/pics/` directory, while associated metadata is saved to `outputs/details/`.
    - Metadata (URL, seed, title, story) is returned to the client as JSON.
 
 ## Key Hardware Optimizations
